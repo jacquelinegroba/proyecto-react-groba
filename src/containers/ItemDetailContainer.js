@@ -1,27 +1,19 @@
-import CardDetail from "../components/CardDetail";
-import datos from "../data/datos.json";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import customFetch from "../utils/customFetch";
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router';
+import ItemDetail from '../components/ItemDetail';
+import { productsCollection } from '../utils/firebaseConfig';
+import { getDoc, doc } from 'firebase/firestore';
 
 const ItemDetailContainer = () => {
-  const [productDetail, setProductDetail] = useState({});
+  const [productDetail, setProductDetail] = useState([]);
   const { id } = useParams();
 
   useEffect(() => {
-    if (id === undefined) {
-      customFetch(1, datos)
-        .then((result) => setProductDetail(result[0]))
-        .catch((err) => console.log(err));
-    } else {
-      customFetch(1, datos.filter((item) => item.id === parseInt(id))[0])
-        .then((result) => setProductDetail(result))
-        .catch((err) => console.log(err));
-    }
-  }, [id]);
+    const detailFilter = doc(productsCollection, id);
 
-  return <CardDetail datos={productDetail} />;
+    getDoc(detailFilter).then((res) => setProductDetail({ id: res.id, ...res.data() }));
+  }, [id]);
+  return <ItemDetail products={productDetail} />;
 };
 
 export default ItemDetailContainer;
-
